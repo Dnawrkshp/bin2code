@@ -101,7 +101,7 @@ int main(int argc, char *argv[])
             }
             case 1: // PNACH
             {
-                fprintf(dest, "patch=1,EE,%08X,extended,%08X\n", address + i, *(unsigned int*)(buffer + i));
+                fprintf(dest, "patch=1,EE,%08X,extended,%08X\n", 0x20000000 | (address + i), *(unsigned int*)(buffer + i));
                 break;
             }
         }
