@@ -14,13 +14,42 @@
 #include <fcntl.h>
 #include <stdlib.h>
 #include <stdio.h>
+#include <string.h>
 
 unsigned char *buffer;
 
 const char * FORMATS[] = {
     "raw",
-    "pnach"
+    "pnach",
+    "raw-writeonce",
+    "pnach-writeonce"
 };
+
+void writeWriteOnce(int i, int total_size, FILE * dest, unsigned int address, int format)
+{
+    // only write every 255 codes
+    if (i % (255 * 4) != 0)
+        return;
+
+    // get count
+    int count = (total_size - i) / 4;
+    if (count > 255)
+        count = 255;
+
+    switch (format)
+    {
+        case 2: // RAW WRITE ONCE
+        {
+            fprintf(dest, "E0%02X%04X %08X\n", count, *(unsigned short*)(buffer + i), 0x20000000 | ((i + address) & 0x1FFFFFFF));
+            break;
+        }
+        case 3: // PNACH WRITE ONCE
+        {
+            fprintf(dest, "patch=1,EE,E0%02X%04X,extended,%08X\n", count, *(unsigned short*)(buffer + i), 0x20000000 | ((i + address) & 0x1FFFFFFF));
+            break;
+        }
+    }
+}
 
 /* 
  * ARGS:
@@ -92,14 +121,21 @@ int main(int argc, char *argv[])
     }
 
 	for(i=0;i<fd_size;i += 4) {
+
+        // try to write 'write-once' conditional code (E type)
+        writeWriteOnce(i, fd_size, dest, address, format);
+
+        // 
         switch (format)
         {
             case 0: // RAW
+            case 2: // RAW WRITE ONCE
             {
                 fprintf(dest, "%08X %08X\n", 0x20000000 | (address + i), *(unsigned int*)(buffer + i));
                 break;
             }
             case 1: // PNACH
+            case 3: // PNACH WRITE ONCE
             {
                 fprintf(dest, "patch=1,EE,%08X,extended,%08X\n", 0x20000000 | (address + i), *(unsigned int*)(buffer + i));
                 break;
@@ -108,8 +144,6 @@ int main(int argc, char *argv[])
 	}
 
 	fprintf(dest, "\n");
-
 	fclose(dest);
-
 	return 0;
 }
