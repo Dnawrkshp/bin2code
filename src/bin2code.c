@@ -120,7 +120,7 @@ int main(int argc, char *argv[])
         }
     }
 
-	for(i=0;i<fd_size;i += 4) {
+	for(i=fd_size-4;i>=0;i-=4) {
 
         // try to write 'write-once' conditional code (E type)
         writeWriteOnce(i, fd_size, dest, address, format);
