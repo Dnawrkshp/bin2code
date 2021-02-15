@@ -120,10 +120,11 @@ int main(int argc, char *argv[])
         }
     }
 
+    int count = 0;
 	for(i=fd_size-4;i>=0;i-=4) {
 
         // try to write 'write-once' conditional code (E type)
-        writeWriteOnce(i, fd_size, dest, address, format);
+        writeWriteOnce(count*4, fd_size, dest, address, format);
 
         // 
         switch (format)
@@ -141,6 +142,8 @@ int main(int argc, char *argv[])
                 break;
             }
         }
+
+        ++count;
 	}
 
 	fprintf(dest, "\n");
