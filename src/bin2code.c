@@ -40,12 +40,12 @@ void writeWriteOnce(int i, int total_size, FILE * dest, unsigned int address, in
     {
         case 2: // RAW WRITE ONCE
         {
-            fprintf(dest, "E0%02X%04X %08X\n", count, *(unsigned short*)(buffer + i), 0x20000000 | ((i + address) & 0x1FFFFFFF));
+            fprintf(dest, "E0%02X%04X %08X\n", count, *(unsigned short*)(buffer + 0), 0x20000000 | (address & 0x1FFFFFFF));
             break;
         }
         case 3: // PNACH WRITE ONCE
         {
-            fprintf(dest, "patch=1,EE,E0%02X%04X,extended,%08X\n", count, *(unsigned short*)(buffer + i), 0x20000000 | ((i + address) & 0x1FFFFFFF));
+            fprintf(dest, "patch=1,EE,E0%02X%04X,extended,%08X\n", count, *(unsigned short*)(buffer + 0), 0x20000000 | (address & 0x1FFFFFFF));
             break;
         }
     }
